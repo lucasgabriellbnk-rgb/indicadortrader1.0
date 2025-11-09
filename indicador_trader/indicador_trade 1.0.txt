@@ -1,0 +1,57 @@
+from flask import Flask, render_template, request
+import cv2
+import pytesseract
+import numpy as np
+from datetime import datetime
+import random
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return '''
+    <h2>📊 Indicador Trader IA</h2>
+    <form method="POST" enctype="multipart/form-data" action="/analisar">
+      <input type="file" name="imagem" accept="image/*" required>
+      <br><br>
+      <button type="submit">📈 Enviar e Analisar</button>
+    </form>
+    '''
+
+@app.route('/analisar', methods=['POST'])
+def analisar():
+    file = request.files['imagem']
+    if not file:
+        return "Nenhuma imagem enviada."
+
+    # Lê imagem
+    imagem = np.frombuffer(file.read(), np.uint8)
+    img = cv2.imdecode(imagem, cv2.IMREAD_COLOR)
+
+    # Usa OCR (para detectar texto ou candles)
+    texto = pytesseract.image_to_string(img)
+
+    # Lógica de análise simulada (você pode adaptar com padrões reais)
+    hora = datetime.now().strftime("%H:%M:%S")
+    direcao = random.choice(["CALL (compra)", "PUT (venda)", "Nenhuma entrada"])
+    prob = round(random.uniform(75, 98), 2)
+
+    resultado = f"""
+    <h3>📊 Resultado da análise:</h3>
+    <ul>
+        <li>Horário da análise: {hora}</li>
+        <li>Recomendação: <b>{direcao}</b></li>
+        <li>Probabilidade: <b>{prob}%</b></li>
+    </ul>
+    <a href="/">🔙 Fazer nova análise</a>
+    """
+
+    return resultado
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
+Flask
+opencv-python
+pytesseract
+numpy
+python-3.10
